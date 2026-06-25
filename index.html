@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f6f2ea" />
+    <title>WordFlow · 单词音频练习器</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="WordFlow 首页">
+          <span class="brand-mark">
+            <span></span><span></span><span></span><span></span>
+          </span>
+          <span>WordFlow</span>
+        </a>
+        <div class="top-actions">
+          <span class="status-dot"><i></i> 本地运行</span>
+          <button class="icon-button" id="themeButton" aria-label="切换深色模式" title="切换主题">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.64 5.64l1.42 1.42m9.88 9.88 1.42 1.42m0-12.72-1.42 1.42M7.06 16.94l-1.42 1.42" />
+              <circle cx="12" cy="12" r="4" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <section class="hero">
+        <div>
+          <p class="eyebrow">LISTEN · REPEAT · REMEMBER</p>
+          <h1>让每个单词，<br /><em>听得更清楚。</em></h1>
+        </div>
+        <p class="hero-copy">输入你的单词，设置速度与重复次数。WordFlow 会使用美式英语发音，将它们串成一段连续的听力练习。</p>
+      </section>
+
+      <section class="workspace">
+        <article class="panel input-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="step">01</span>
+              <h2>输入单词</h2>
+            </div>
+            <span id="wordCounter">0 个单词</span>
+          </div>
+
+          <label class="textarea-wrap">
+            <span class="sr-only">输入英文单词</span>
+            <textarea id="wordInput" spellcheck="false" placeholder="每行输入一个单词，或用逗号分隔&#10;&#10;例如：&#10;serendipity&#10;resilient&#10;eloquent"></textarea>
+          </label>
+
+          <div class="input-footer">
+            <button class="text-button" id="exampleButton">填入示例</button>
+            <button class="text-button muted" id="clearButton">清空</button>
+          </div>
+        </article>
+
+        <article class="panel settings-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="step">02</span>
+              <h2>发音设置</h2>
+            </div>
+            <span class="accent-badge">US</span>
+          </div>
+
+          <div class="setting-group">
+            <div class="setting-label">
+              <label for="voiceSelect">美式发音人</label>
+              <span id="voiceState">正在查找...</span>
+            </div>
+            <div class="select-wrap">
+              <select id="voiceSelect" aria-label="选择美式英语发音人"></select>
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 8 4 4 4-4" /></svg>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <div class="setting-label">
+              <label for="speedRange">播放速度</label>
+              <output id="speedValue">1.0×</output>
+            </div>
+            <input type="range" id="speedRange" min="0.5" max="2" value="1" step="0.1" />
+            <div class="range-labels"><span>慢速 0.5×</span><span>快速 2.0×</span></div>
+          </div>
+
+          <div class="setting-group">
+            <div class="setting-label">
+              <span>每个单词重复</span>
+              <output id="repeatValue">3 遍</output>
+            </div>
+            <div class="stepper" role="group" aria-label="设置重复次数">
+              <button id="minusRepeat" aria-label="减少重复次数">−</button>
+              <strong id="repeatNumber">3</strong>
+              <button id="plusRepeat" aria-label="增加重复次数">＋</button>
+            </div>
+          </div>
+
+          <div class="setting-group compact">
+            <div class="setting-label">
+              <label for="gapRange">单词间隔</label>
+              <output id="gapValue">0.8 秒</output>
+            </div>
+            <input type="range" id="gapRange" min="0" max="3" value="0.8" step="0.1" />
+          </div>
+        </article>
+      </section>
+
+      <section class="playlist-section">
+        <div class="section-heading">
+          <div>
+            <span class="step">03</span>
+            <h2>练习队列</h2>
+          </div>
+          <button class="preview-button" id="previewFirstButton" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7V5Z" /></svg>
+            试听第一个
+          </button>
+        </div>
+        <div class="empty-state" id="emptyState">
+          <div class="sound-orbit">
+            <i></i><i></i><i></i><i></i><i></i>
+          </div>
+          <h3>你的单词会出现在这里</h3>
+          <p>在上方输入单词，队列会自动生成</p>
+        </div>
+        <div class="word-list" id="wordList" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <footer class="player" id="player">
+      <div class="player-progress"><span id="progressBar"></span></div>
+      <div class="now-playing">
+        <span class="mini-art"><i></i><i></i><i></i></span>
+        <div>
+          <small id="playingLabel">准备就绪</small>
+          <strong id="playingWord">等待添加单词</strong>
+        </div>
+      </div>
+      <div class="transport">
+        <button id="previousButton" aria-label="上一个单词" disabled>
+          <svg viewBox="0 0 24 24"><path d="M6 5v14M18 6l-9 6 9 6V6Z" /></svg>
+        </button>
+        <button class="main-play" id="playButton" aria-label="播放" disabled>
+          <svg class="play-icon" viewBox="0 0 24 24"><path d="m9 6 9 6-9 6V6Z" /></svg>
+          <svg class="pause-icon" viewBox="0 0 24 24"><path d="M8 6h3v12H8zM13 6h3v12h-3z" /></svg>
+        </button>
+        <button id="nextButton" aria-label="下一个单词" disabled>
+          <svg viewBox="0 0 24 24"><path d="M18 5v14M6 6l9 6-9 6V6Z" /></svg>
+        </button>
+      </div>
+      <div class="player-meta">
+        <span id="progressText">0 / 0</span>
+        <button id="stopButton" disabled>
+          <svg viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1" /></svg>
+          停止
+        </button>
+      </div>
+    </footer>
+
+    <div class="toast" id="toast" role="status"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>
